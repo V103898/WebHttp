@@ -25,12 +25,12 @@ public class Server {
 
     public void start() {
         if (isRunning) {
-            throw new IllegalStateException("Server is already running");
+            throw new IllegalStateException("CEPBEP уже Запущен!");
         }
         isRunning = true;
 
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("Server started on port " + port);
+            System.out.println("3AnyCK CEPBEPA HA nopTy " + port);
 
             while (isRunning) {
                 try {
@@ -52,6 +52,6 @@ public class Server {
     public void shutdown() {
         isRunning = false;
         threadPool.shutdown();
-        System.out.println("Server shutdown");
+        System.out.println("CEPBEP shutdown");
     }
 }
