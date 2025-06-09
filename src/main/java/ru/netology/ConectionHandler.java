@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 
- class ConnectionHandler implements Runnable {
+class ConnectionHandler implements Runnable {
     private final Socket socket;
     private final List<String> validPaths;
 
@@ -24,19 +24,30 @@ import java.util.List;
             String requestLine = in.readLine();
             if (requestLine == null) return;
 
-            String[] parts = requestLine.split(" ");
-            if (parts.length != 3) {
+            Request request;
+            try {
+                request = Request.fromRequestLine(requestLine);
+            } catch (IllegalArgumentException e) {
+                sendResponse(out, "400 Bad Request", "text/plain", "Invalid request".getBytes());
                 return;
             }
 
-            String path = parts[1];
+            String path = request.getPath();
             if (!validPaths.contains(path)) {
-                sendResponse(out, "404 Not Found", "text/plain", new byte[0]);
+                sendResponse(out, "404 Not Found", "text/plain", "Not Found".getBytes());
                 return;
             }
 
             Path filePath = Path.of(".", "public", path);
+            if (!Files.exists(filePath)) {
+                sendResponse(out, "404 Not Found", "text/plain", "File not found".getBytes());
+                return;
+            }
+
             String mimeType = Files.probeContentType(filePath);
+            if (mimeType == null) {
+                mimeType = "application/octet-stream";
+            }
 
             if (path.equals("/classic.html")) {
                 handleClassicHtml(filePath, mimeType, out);
